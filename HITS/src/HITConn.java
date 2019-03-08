@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Date;
 
 
 
@@ -14,13 +15,14 @@ public class HITConn {
         String jdbcurl="jdbc:sqlserver://10.173.1.46:1433;DatabaseName=new";
         Connection con = null;
         Connection conn = null;
+        Timestamp t = new Timestamp(new Date().getTime());
         jdbcurl = "jdbc:sqlserver://"+ server + ":" +port + ";user=" + user +
                 ";password=" +password + ";databasename=" + database + "";
         String db2url = "jdbc:db2://10.231.105.176:50005/maxdb71:" +
       		  "user=db2cmdb1;password=mobilink;";     
         int count = 1;
-        String insertsql = "insert into maximo.hits (HITSID,HASLD,EMPLOYEEID,LOGON_NAME,DESIGNATION,DEPARTMENT,MANAGERNUMBER,MANAGERNAME,LOCATION,LOGON_NAME2,DESIGNATION2,DEPARTMENT2,MANAGERNUMBER2,MANAGERNAME2,LOCATION2) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
-        String updatesql = "update maximo.hits SET LOGON_NAME2 = ? , DESIGNATION2 = ? , DEPARTMENT2 = ? , MANAGERNUMBER2 = ? , MANAGERNAME2 = ? , LOCATION2 = ? where EMPLOYEEID = ? ";
+        String insertsql = "insert into maximo.hits (HITSID,HASLD,EMPLOYEEID,LOGON_NAME,DESIGNATION,DEPARTMENT,MANAGERNUMBER,MANAGERNAME,LOCATION,LOGON_NAME2,DESIGNATION2,DEPARTMENT2,MANAGERNUMBER2,MANAGERNAME2,LOCATION2,Extra1) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
+        String updatesql = "update maximo.hits SET LOGON_NAME2 = ? , DESIGNATION2 = ? , DEPARTMENT2 = ? , MANAGERNUMBER2 = ? , MANAGERNAME2 = ? , LOCATION2 = ? , Extra1 = ? where EMPLOYEEID = ? ";
         try {
         	  // Load the IBM Data Server Driver for JDBC and SQLJ with DriverManager
         	  Class.forName("com.ibm.db2.jcc.DB2Driver");
@@ -44,6 +46,7 @@ public class HITConn {
             	while(srt.next())
             	{
             		try {
+            			
             			ps.setString(1, srt.getString("EMPLOYEE_NUMBER"));
             			ps.setInt(2, 0 );
             			ps.setString(3,srt.getString("EMPLOYEE_NUMBER") );
@@ -59,25 +62,28 @@ public class HITConn {
             			ps.setString(13,srt.getString("MANAGERNUMBER"));
             			ps.setString(14,srt.getString("MANAGERNAME"));
             			ps.setString(15,srt.getString("LOCATION"));
+            			ps.setTimestamp(16, t);
             			ps.executeUpdate();
-            			count++;
+            			System.out.print("Inserting User" + srt.getString("EMPLOYEE_NUMBER")+"\n");
             		}
             		catch(SQLException e) {
             			if (e.getMessage().contains("SQLCODE=-803")){
+            			
             			up.setString(1, srt.getString("LOGON_NAME"));
             			up.setString(2, srt.getString("DESIGNATION"));
             			up.setString(3, srt.getString("DEPARTMENT"));
             			up.setString(4, srt.getString("MANAGERNUMBER"));
             			up.setString(5, srt.getString("MANAGERNAME"));
             			up.setString(6, srt.getString("LOCATION"));
-            			up.setString(7, srt.getString("EMPLOYEE_NUMBER"));
+            			up.setTimestamp(7, t);
+            			up.setString(8, srt.getString("EMPLOYEE_NUMBER"));
             			up.executeUpdate();
+            			System.out.print("Updating User" + srt.getString("EMPLOYEE_NUMBER")+"\n");
     					}
             			}
             	}
             	ps.close();
             	up.close();
-        		System.out.print(count);
 
         }catch(SQLException e){
             e.printStackTrace();
